@@ -3,9 +3,26 @@
 'use strict';
 const { DatabaseSync } = require('node:sqlite');
 const path = require('node:path');
+const crypto = require('node:crypto');
 
 const DB_PATH = path.join(__dirname, 'minifacturas.db');
 const db = new DatabaseSync(DB_PATH);
+
+// --- PARCHE (bonus, refuerza el parche de SQLi): hash de contraseñas con
+// scrypt + salt, en vez de guardarlas en texto plano. No forma parte de los
+// 6 vectores exigidos por la guía, pero es buena práctica al tocar /login. ---
+function hashPassword(plain) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(plain, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+function verifyPassword(plain, stored) {
+  const [salt, hash] = stored.split(':');
+  const candidate = crypto.scryptSync(plain, salt, 64).toString('hex');
+  const a = Buffer.from(candidate, 'hex');
+  const b = Buffer.from(hash, 'hex');
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 function init() {
   db.exec(`PRAGMA foreign_keys = OFF;`);
@@ -33,9 +50,11 @@ function init() {
   const insertUser = db.prepare(
     'INSERT INTO users (username, password, role, email) VALUES (?, ?, ?, ?)'
   );
-  insertUser.run('carlos', 'carlos123', 'user', 'carlos@test.com');
-  insertUser.run('admin', 'S3cr3t0Admin!', 'admin', 'admin@minifacturas.local');
-  insertUser.run('maria', 'maria2024', 'user', 'maria@test.com');
+  // PARCHE: contraseñas hasheadas (scrypt+salt) en vez de texto plano.
+  // Las credenciales de prueba siguen siendo las mismas para efectos del laboratorio.
+  insertUser.run('carlos', hashPassword('carlos123'), 'user', 'carlos@test.com');
+  insertUser.run('admin', hashPassword('S3cr3t0Admin!'), 'admin', 'admin@minifacturas.local');
+  insertUser.run('maria', hashPassword('maria2024'), 'user', 'maria@test.com');
 
   const insertInvoice = db.prepare(
     'INSERT INTO invoices (owner_id, concept, amount) VALUES (?, ?, ?)'
@@ -48,4 +67,4 @@ function init() {
   console.log('[db] Base de datos inicializada con datos de prueba en', DB_PATH);
 }
 
-module.exports = { db, init, DB_PATH };
+module.exports = { db, init, DB_PATH, hashPassword, verifyPassword };

