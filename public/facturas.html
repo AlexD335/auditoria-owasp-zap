@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniFacturas — Facturas</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 520px; margin: 60px auto; color: #222; }
+    pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow: auto; }
+    label { display: block; margin-top: 8px; font-size: .9rem; }
+    input { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+    button { margin-top: 12px; padding: 8px 14px; cursor: pointer; }
+    nav a { margin-right: 14px; }
+  </style>
+</head>
+<body>
+  <nav><a href="/">Login</a><a href="/perfil">Perfil</a></nav>
+  <h1>Consultar factura</h1>
+  <label>ID de factura
+    <input type="number" id="invId" value="1">
+  </label>
+  <button onclick="consultar()">Consultar</button>
+  <pre id="resultado"></pre>
+
+  <script>
+    function consultar() {
+      const id = document.getElementById('invId').value;
+      fetch('/api/invoices/' + id).then(r => r.json()).then(d => {
+        document.getElementById('resultado').textContent = JSON.stringify(d, null, 2);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniFacturas — Mi perfil</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 520px; margin: 60px auto; color: #222; }
+    pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow: auto; }
+    section { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 20px; }
+    label { display: block; margin-top: 8px; font-size: .9rem; }
+    input { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+    button { margin-top: 12px; padding: 8px 14px; cursor: pointer; }
+    nav a { margin-right: 14px; }
+  </style>
+</head>
+<body>
+  <nav><a href="/">Login</a><a href="/facturas">Facturas</a></nav>
+  <h1>Mi perfil</h1>
+  <pre id="me">Cargando...</pre>
+
+  <section>
+    <h3>Actualizar perfil</h3>
+    <label>Email
+      <input type="text" id="email" placeholder="nuevo@correo.com">
+    </label>
+    <button onclick="actualizar()">Guardar</button>
+    <pre id="resultado"></pre>
+  </section>
+
+  <section>
+    <h3>Subir avatar desde URL</h3>
+    <label>URL de la imagen
+      <input type="text" id="avatarUrl" placeholder="https://ejemplo.com/foto.jpg">
+    </label>
+    <button onclick="obtenerAvatar()">Obtener</button>
+    <pre id="avatarResultado"></pre>
+  </section>
+
+  <script>
+    fetch('/api/me').then(r => r.json()).then(d => {
+      document.getElementById('me').textContent = JSON.stringify(d, null, 2);
+    });
+
+    function actualizar() {
+      const email = document.getElementById('email').value;
+      fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      }).then(r => r.json()).then(d => {
+        document.getElementById('resultado').textContent = JSON.stringify(d, null, 2);
+      });
+    }
+
+    function obtenerAvatar() {
+      const u = document.getElementById('avatarUrl').value;
+      fetch('/api/avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: u })
+      }).then(r => r.json()).then(d => {
+        document.getElementById('avatarResultado').textContent = JSON.stringify(d, null, 2);
+      });
+    }
+  </script>
+</body>
+</html>

