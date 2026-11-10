@@ -1,1 +1,4 @@
 node_modules/\n*.db\n.env
+
+# Base de datos local
+minifacturas.db
