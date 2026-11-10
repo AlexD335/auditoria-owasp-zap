@@ -1,4 +1,16 @@
-node_modules/\n*.db\n.env
+# Dependencias
+node_modules/
 
-# Base de datos local
-minifacturas.db
+# Bases de datos
+*.db
+
+# Variables de entorno y secretos
+.env
+.env.*
+
+# Evidencias y archivos de pruebas locales
+evidencias/
+*-cookies.txt
+csrf-poc-email.html
+mass-assignment.json
+ssrf-test.json
