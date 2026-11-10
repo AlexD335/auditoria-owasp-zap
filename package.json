@@ -4,8 +4,8 @@
   "description": "App de laboratorio para auditoria con OWASP ZAP - Seguridad en Aplicaciones Web",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
-  },
+  "start": "node --env-file=.env server.js"
+},
   "engines": {
     "node": ">=22.5.0"
   },
